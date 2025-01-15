@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,22 +36,13 @@ public sealed class Board : MonoBehaviour
                 tile.x = x;
                 tile.y = y;
 
-                tile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];
+                tile.Item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
             
                 Tiles[x, y] = tile;
             }
         }
     }
 
-    private void Update()
-    {
-        if(!Input.GetKeyDown(KeyCode.A)) return;
-
-        foreach(var connectedTile in Tiles[0, 0].GetConnectedTiles())
-        {
-            connectedTile.icon.transform.DOScale(1.25f, TweenDuration).Play();
-        }
-    }
 
     public async void Select(Tile tile)
     {
@@ -69,6 +59,15 @@ public sealed class Board : MonoBehaviour
         Debug.Log($"Selected tiles at {_selection[0].x}, {_selection[0].y} and {_selection[1].x}, {_selection[1].y}");
 
         await Swap(_selection[0], _selection[1]);
+
+        if(CanPOP())
+        {
+            Pop();
+        }
+        else
+        {
+            await Swap(_selection[0], _selection[1]);
+        }
 
         _selection.Clear();
     }
@@ -103,11 +102,55 @@ public sealed class Board : MonoBehaviour
 
     private bool CanPOP()
     {
-        throw new NotImplementedException();
+        for(var y = 0; y < Height; y++)
+        {
+            for(var x = 0; x < Width; x++)
+            {
+                if(Tiles[x, y].GetConnectedTiles().Skip(1).Count() >= 2)
+                return true;
+                
+            }
+        }
+        return false;
     }
 
-    private void Pop()
+    private async void Pop()
     {
-        throw new NotImplementedException();
+        for(var y=0; y < Height; y++)
+        {
+            for(var x=0; x <Width; x++)
+            {
+                var tile = Tiles[x, y];
+
+                var connectedTiles = tile.GetConnectedTiles();
+
+                if(connectedTiles.Skip(1).Count() < 2)
+                {
+                    continue;
+                } 
+
+                var deflateSequence = DOTween.Sequence();
+
+                foreach(var connectedTile in connectedTiles)
+                {
+                    deflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.zero, TweenDuration));
+                }
+
+                await deflateSequence.Play()
+                .AsyncWaitForCompletion();
+
+                var inflateSequence = DOTween.Sequence();
+
+                foreach(var connectedTile in connectedTiles)
+                {
+                    connectedTile.Item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
+                    
+                    inflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.one, TweenDuration));
+                }
+
+                await inflateSequence.Play()
+                .AsyncWaitForCompletion();
+            }
+        }
     }
 }
