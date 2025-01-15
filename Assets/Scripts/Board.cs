@@ -9,6 +9,11 @@ public sealed class Board : MonoBehaviour
 {
     public static Board Instance { get; private set; }
 
+    [SerializeField]
+    private AudioClip popSound;
+
+    [SerializeField]
+    private AudioSource audioSource;
     public Row[] rows;
 
     public Tile[,] Tiles { get; private set; }
@@ -41,6 +46,8 @@ public sealed class Board : MonoBehaviour
                 Tiles[x, y] = tile;
             }
         }
+
+        //Pop(); //Enable this for pop matching tiles on start
     }
 
 
@@ -55,8 +62,6 @@ public sealed class Board : MonoBehaviour
         {
             return;
         }
-
-        Debug.Log($"Selected tiles at {_selection[0].x}, {_selection[0].y} and {_selection[1].x}, {_selection[1].y}");
 
         await Swap(_selection[0], _selection[1]);
 
@@ -136,10 +141,13 @@ public sealed class Board : MonoBehaviour
                     deflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.zero, TweenDuration));
                 }
 
-                await deflateSequence.Play()
-                .AsyncWaitForCompletion();
+                audioSource.PlayOneShot(popSound);
 
                 ScoreCounter.Instance.Score += tile.Item.value * connectedTiles.Count;
+
+
+                await deflateSequence.Play()
+                .AsyncWaitForCompletion();
 
                 var inflateSequence = DOTween.Sequence();
 
@@ -152,6 +160,9 @@ public sealed class Board : MonoBehaviour
 
                 await inflateSequence.Play()
                 .AsyncWaitForCompletion();
+
+                x = 0;
+                y = 0;
             }
         }
     }
