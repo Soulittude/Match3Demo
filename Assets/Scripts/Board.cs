@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,10 +37,20 @@ public sealed class Board : MonoBehaviour
                 tile.x = x;
                 tile.y = y;
 
-                tile.Item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
+                tile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];
             
                 Tiles[x, y] = tile;
             }
+        }
+    }
+
+    private void Update()
+    {
+        if(!Input.GetKeyDown(KeyCode.A)) return;
+
+        foreach(var connectedTile in Tiles[0, 0].GetConnectedTiles())
+        {
+            connectedTile.icon.transform.DOScale(1.25f, TweenDuration).Play();
         }
     }
 
@@ -58,7 +69,7 @@ public sealed class Board : MonoBehaviour
         Debug.Log($"Selected tiles at {_selection[0].x}, {_selection[0].y} and {_selection[1].x}, {_selection[1].y}");
 
         await Swap(_selection[0], _selection[1]);
-        
+
         _selection.Clear();
     }
 
@@ -88,5 +99,15 @@ public sealed class Board : MonoBehaviour
 
         tile1.Item = tile2.Item;
         tile2.Item = tile1Icon;
+    }
+
+    private bool CanPOP()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void Pop()
+    {
+        throw new NotImplementedException();
     }
 }
