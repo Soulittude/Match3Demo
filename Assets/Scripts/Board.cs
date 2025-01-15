@@ -25,6 +25,9 @@ public sealed class Board : MonoBehaviour
             {
                 var tile = rows[y].tiles[x];
 
+                tile.x = x;
+                tile.y = y;
+                
                 Tiles[x, y] = tile;
 
                 tile.Item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
