@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ public sealed class Board : MonoBehaviour
                 tile.x = x;
                 tile.y = y;
 
-                tile.Item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
+                tile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];
             
                 Tiles[x, y] = tile;
             }
@@ -55,8 +56,20 @@ public sealed class Board : MonoBehaviour
     {
         if(!_selection.Contains(tile))
         {
-            _selection.Add(tile);
+            if(_selection.Count > 0)
+            {
+                if(Array.IndexOf(_selection[0].Neighbours, tile) != -1)
+                {
+                    _selection.Add(tile);
+                }
+            }
+            else
+            {
+                _selection.Add(tile);
+            }
         }
+
+
 
         if(_selection.Count < 2)
         {
@@ -153,7 +166,7 @@ public sealed class Board : MonoBehaviour
 
                 foreach(var connectedTile in connectedTiles)
                 {
-                    connectedTile.Item = ItemDatabase.Items[Random.Range(0, ItemDatabase.Items.Length)];
+                    connectedTile.Item = ItemDatabase.Items[UnityEngine.Random.Range(0, ItemDatabase.Items.Length)];
                     
                     inflateSequence.Join(connectedTile.icon.transform.DOScale(Vector3.one, TweenDuration));
                 }
